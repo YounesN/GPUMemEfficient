@@ -3,7 +3,6 @@
 #include<fstream>
 #include<sstream>
 #include<string>
-#include<sys/time.h>
 #include"GPU_2DSOR_PARALLELOGRAM.h"
 using namespace std;
 //#define DEBUG
@@ -104,21 +103,12 @@ int main(int argc, char **argv){
 	readInputData(str1, n1, n2, padd, &arr);
 
 //	displayInput(arr, n1, n2, padd);
-	
-	struct timeval tbegin, tend;
-
-	gettimeofday(&tbegin, NULL);
 
 #ifdef batchexe
 	for (int i=0; i<100; i++)
 #endif	
 	SOR(n1, n2, stride, padd, arr, trial);
 
-	gettimeofday(&tend, NULL);
-
-	double s = (double)(tend.tv_sec - tbegin.tv_sec) + (double)(tend.tv_usec - tbegin.tv_usec)/1000000.0;
-
-//	cout << "total execution time: " << s << " second." << endl;
 #ifdef DEBUG
 	string outfile = "./Output/output_LCS_";
 	outfile.append(convert1.str());

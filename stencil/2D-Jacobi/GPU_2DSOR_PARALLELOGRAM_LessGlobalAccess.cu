@@ -1,9 +1,21 @@
+#ifdef __linux__
+#include<sys/time.h>
+#elif _WIN32
+#include<cuda_runtime.h>
+#include<cuda_runtime_api.h>
+#include<cuda.h>
+#include "device_launch_parameters.h"
+#include <time.h>
+#define NOMINMAX
+#include <algorithm>
+using namespace std;
+#include <windows.h>
+#include <gdiplus.h>
+#endif
 #include<iostream>
 #include<cstdlib>
 #include<fstream>
 #include<string>
-#include<sys/time.h>
-
 //#define ALL
 //#define DEBUG
 //#define PRINT_FIRST_BATCH
@@ -50,8 +62,8 @@ __device__ void _jacobi_cross(volatile int* tile1, volatile int* tile2, int newt
 }
 
 __device__ void stencil(volatile int* tile1, volatile int* tile2, int newtilePos, int tilePos, int* stride, int* segLengthX){
-	_jacobi_square(tile1, tile2, newtilePos, tilePos, stride, segLengthX);
-//	_jacobi_cross(tile1, tile2, newtilePos, tilePos, stride, segLengthX);
+	//_jacobi_square(tile1, tile2, newtilePos, tilePos, stride, segLengthX);
+	_jacobi_cross(tile1, tile2, newtilePos, tilePos, stride, segLengthX);
 }
 
 
@@ -1518,9 +1530,9 @@ void SOR(int n1, int n2, int stride, int padd, int *arr, int MAXTRIAL){
 	int yseg = n2 / tileY + 1;
 	int tseg = (MAXTRIAL + tileT - 1) / tileT;
 #ifndef RTX_2080
-	int numStream = 28;
+	const int numStream = 28;
 #else
-	int numStream = 68;
+	const int numStream = 68;
 #endif
 	int stream_offset = yseg % numStream;
 
@@ -1592,8 +1604,13 @@ void SOR(int n1, int n2, int stride, int padd, int *arr, int MAXTRIAL){
 	checkGPUError(err);
 	err = cudaMemcpy(dev_var, var, 11 * sizeof(int), cudaMemcpyHostToDevice);
 
+#ifdef __linux__
 	struct timeval tbegin, tend;
 	gettimeofday(&tbegin, NULL);
+#elif _WIN32
+	clock_t tbegin, tend;
+	tbegin = clock();
+#endif
 //t < MAXTRIAL? or t <= MAXTRIAL	
 	for(int t = 0; t < MAXTRIAL; t+= tileT){
 		for(int curBatch = 0; curBatch < yseg; curBatch++){
@@ -1616,7 +1633,12 @@ void SOR(int n1, int n2, int stride, int padd, int *arr, int MAXTRIAL){
 //		cudaDeviceSynchronize();
 	}
 	cudaDeviceSynchronize();
+
+#ifdef __linux__
 	gettimeofday(&tend, NULL);
+#elif _WIN32
+	tend = clock();
+#endif
 
 	err = cudaMemcpy(arr, (void*)dev_arr, tablesize*sizeof(int), cudaMemcpyDeviceToHost);
 	checkGPUError(err);
@@ -1629,7 +1651,12 @@ void SOR(int n1, int n2, int stride, int padd, int *arr, int MAXTRIAL){
 	}
 	cout << endl;
 #endif
+
+#ifdef __linux__
 	double s = (double)(tend.tv_sec - tbegin.tv_sec) + (double)(tend.tv_usec - tbegin.tv_usec)/1000000.0;
+#elif _WIN32
+	double s = (double)(tend - tbegin) / CLOCKS_PER_SEC;
+#endif
 	cout << "execution time: " << s << " second." << endl;
 
 	for (int s=0; s<numStream; s++)

@@ -4,6 +4,9 @@
 #include<string>
 #include<sstream>
 #include<cmath>
+#ifdef _WIN32
+#include <Windows.h>
+#endif
 
 using namespace std;
 
@@ -35,7 +38,12 @@ int main(int argc, char *argv[]){
 
 	int *arr;
 	arr = new int[(size1+2*paddsize)*(size2+2*paddsize)];
+#ifdef _WIN32
+	::srand(GetTickCount());
+#else
 	srand(time(NULL));
+#endif
+	
 	
 	for (int j=0; j<size2+2*paddsize; j++){
 		for (int i=0; i<size1+2*paddsize; i++)	
