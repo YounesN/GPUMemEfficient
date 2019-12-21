@@ -29,6 +29,15 @@ using namespace std;
 #define SYNC
 //#define RTX_2080
 
+#define TILEX 32
+#define TILEY 64
+#define TILET 10
+#define STRIDE 5
+#define INTRA_DEP (TILEX * TILET * STRIDE * 2)
+#define INTER_DEP (TILEY * TILET * STRIDE * 2)
+#define TILE_SIZE ((TILEX + 2 * STRIDE) * (TILEY + 2 * STRIDE))
+
+
 const int MAX_THREADS_PER_BLOCK = 1024;
 const int warpsize = 32;
 
@@ -379,10 +388,10 @@ __global__ void GPU_Tile(volatile int* dev_arr, const int curBatch, int* dev_var
 	//inter_dep size is restricted by "dep_stride", "tileX", and "tileT".
 	
 	//tileX: 32; tileY: 64, stride: 1-5, 48 KB
-	volatile __shared__ int tile1[3108]; // = (tileX + 2 * stride) * (tileY + 2 * stride)
-	volatile __shared__ int tile2[3108]; // = (tileX + 2 * stride) * (tileY + 2 * stride)
-	__shared__ int intra_dep[4230];
-	__shared__ int inter_dep[1824];
+	volatile __shared__ int tile1[TILE_SIZE]; // = (tileX + 2 * stride) * (tileY + 2 * stride)
+	volatile __shared__ int tile2[TILE_SIZE]; // = (tileX + 2 * stride) * (tileY + 2 * stride)
+	__shared__ int intra_dep[INTRA_DEP];
+	__shared__ int inter_dep[INTER_DEP];
 	
 	__shared__ int YoverX[1];
 	__shared__ int dep_stride[1];
@@ -1500,8 +1509,8 @@ void SOR(int n1, int n2, int stride, int padd, int *arr, int MAXTRIAL){
 	//when we change stride, we also need to update parameter "paddsize" in data generator file.
 	//padd = 2 * stride
 	int dep_stride = padd;
-	int tileX = 32;
-	int tileY = 64;
+	int tileX = TILEX;
+	int tileY = TILEY;
 	//the shared memory available for intra_dep array.
 	int intra_size = 48 / (int)sizeof(int) * 1024 - (tileX + dep_stride) * (tileY + dep_stride) * 2;
 	//tileT is restriced by "tileY" and "intra_dep" shared array size.
