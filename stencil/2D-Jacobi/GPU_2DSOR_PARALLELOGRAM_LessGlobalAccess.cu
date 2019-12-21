@@ -89,7 +89,7 @@ __device__ void swapTile(volatile int* tile1, volatile int* tile2, int* segLengt
 		tile2[idx] = 0;
 	}
 }
-		
+
 __device__ void printGlobal(volatile int* dev_arr, int* width, int* height, int curSMStream){
 	if (threadIdx.x == 0 ){
 		for (int r = 0; r < height[0]; r++){
@@ -1501,7 +1501,7 @@ void SOR(int n1, int n2, int stride, int padd, int *arr, int MAXTRIAL){
 	//padd = 2 * stride
 	int dep_stride = padd;
 	int tileX = 32;
-	int tileY = 64;
+	int tileY = 128;
 	//the shared memory available for intra_dep array.
 	int intra_size = 48 / (int)sizeof(int) * 1024 - (tileX + dep_stride) * (tileY + dep_stride) * 2;
 	//tileT is restriced by "tileY" and "intra_dep" shared array size.
