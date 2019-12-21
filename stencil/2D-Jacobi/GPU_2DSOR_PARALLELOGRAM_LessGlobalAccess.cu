@@ -379,8 +379,8 @@ __global__ void GPU_Tile(volatile int* dev_arr, const int curBatch, int* dev_var
 	//inter_dep size is restricted by "dep_stride", "tileX", and "tileT".
 	
 	//tileX: 32; tileY: 64, stride: 1-5, 48 KB
-	volatile __shared__ int tile1[3108];
-	volatile __shared__ int tile2[3108];
+	volatile __shared__ int tile1[3108]; // = (tileX + 2 * stride) * (tileY + 2 * stride)
+	volatile __shared__ int tile2[3108]; // = (tileX + 2 * stride) * (tileY + 2 * stride)
 	__shared__ int intra_dep[4230];
 	__shared__ int inter_dep[1824];
 	
