@@ -1501,7 +1501,7 @@ void SOR(int n1, int n2, int stride, int padd, int *arr, int MAXTRIAL){
 	//padd = 2 * stride
 	int dep_stride = padd;
 	int tileX = 32;
-	int tileY = 128;
+	int tileY = 64;
 	//the shared memory available for intra_dep array.
 	int intra_size = 48 / (int)sizeof(int) * 1024 - (tileX + dep_stride) * (tileY + dep_stride) * 2;
 	//tileT is restriced by "tileY" and "intra_dep" shared array size.
