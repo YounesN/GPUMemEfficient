@@ -32,7 +32,7 @@ using namespace std;
 #define TILEX 16
 #define TILEY 128
 #define TILET 10
-#define STRIDE 5
+#define STRIDE 2
 #define INTRA_DEP (TILEY * TILET * STRIDE * 2)
 #define INTER_DEP (TILEX * TILET * STRIDE * 2)
 #define TILE_SIZE ((TILEX + 2 * STRIDE) * (TILEY + 2 * STRIDE))
