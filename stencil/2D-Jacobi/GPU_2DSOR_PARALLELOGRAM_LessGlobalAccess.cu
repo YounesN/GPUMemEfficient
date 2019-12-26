@@ -29,9 +29,9 @@ using namespace std;
 #define SYNC
 //#define RTX_2080
 
-#define TILEX 32
-#define TILEY 64
-#define TILET 4
+#define TILEX 16
+#define TILEY 128
+#define TILET 10
 #define STRIDE 5
 #define INTRA_DEP (TILEY * TILET * STRIDE * 2)
 #define INTER_DEP (TILEX * TILET * STRIDE * 2)
